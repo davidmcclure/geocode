@@ -1,0 +1,16 @@
+
+*.pyc
+*.egg-info
+*.ipynb_checkpoints
+*.db
+*.db-journal
+
+/env
+/build
+/static
+/dist
+/.cache
+/.env
+
+/corpus
+/data
