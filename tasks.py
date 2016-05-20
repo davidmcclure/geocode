@@ -2,12 +2,13 @@
 
 from invoke import task
 from polyglot.text import Text
+from geopy.geocoders import Nominatim
 
 import csv
 
 
 @task
-def test(in_path, out_path):
+def geocode(in_path, out_path):
 
     """
     Extract entities from a text file.
@@ -18,11 +19,30 @@ def test(in_path, out_path):
     """
 
     with open(in_path, 'r') as fh:
-
         text = Text(fh.read())
 
-        entities = [e for e in text.entities if e.tag == 'I-LOC']
+    entities = [e for e in text.entities if e.tag == 'I-LOC']
 
-        with open(out_path, 'w') as fh:
-            for e in entities:
-                print(' '.join(text.words[e.start:e.end]), file=fh)
+    geocoder = Nominatim()
+
+    with open(out_path, 'w') as fh:
+
+        cols = ['toponym', 'latitude', 'longitude']
+        writer = csv.DictWriter(fh, cols)
+        writer.writeheader()
+
+        for e in entities:
+
+            query = ' '.join(text.words[e.start:e.end])
+
+            loc = geocoder.geocode(query)
+
+            if loc:
+
+                print(query, loc.latitude, loc.longitude)
+
+                writer.writerow(dict(
+                    toponym=query,
+                    latitude=loc.latitude,
+                    longitude=loc.longitude,
+                ))
